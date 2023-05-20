@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  mysql:
+    container_name: mysql_zenml
+    restart: always
+    image: mysql:8.0
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    volumes:
+      - "$PWD/mysql-data:/var/lib/mysql"
+  zenml:
+    container_name: zenml_server
+    image: zenmldocker/zenml-server:0.35.1
+    ports:
+      - "80:8080" #zenml dashboard
+    environment:
+      - ZENML_STORE_URL=mysql://root:password@host.docker.internal/zenml
+      - ZENML_DEFAULT_USER_NAME=admin
+      - ZENML_DEFAULT_USER_PASSWORD=zenml
+    links:
+      - mysql
+    depends_on:
+      - mysql
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: on-failure
