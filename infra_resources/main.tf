@@ -91,7 +91,7 @@ resource "aws_s3_bucket" "zenml_bucket" {
 }
 
 resource "aws_ecr_repository" "zenml_registry" {
-  name                 = "zenml-registry"
+  name                 = "zenml"
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
