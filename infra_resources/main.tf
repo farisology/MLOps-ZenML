@@ -61,6 +61,36 @@ module "default_ec2_sg" {
   }
 }
 
+resource "aws_security_group" "zenml_sg" {
+  name        = "zenml_sg"
+  description = "Allow inbound traffic to webserver, flower potsgres and redis"
+  vpc_id      = data.aws_vpc.default.id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name    = "zenml_sg"
+    Project = "MLOps"
+    Owner   = "Farisology"
+  }
+}
 
 resource "aws_instance" "zenml_server" {
   ami           = "ami-0df7a207adb9748c7"
@@ -72,6 +102,7 @@ resource "aws_instance" "zenml_server" {
   vpc_security_group_ids = [
     module.default_ec2_sg.security_group_id,
     module.dev_ssh_sg.security_group_id,
+    aws_security_group.zenml_sg.id
   ]
   tags = {
     Name    = "ZenML Server"
@@ -104,65 +135,65 @@ resource "aws_ecr_repository" "zenml_registry" {
   }
 }
 
-resource "aws_security_group" "airflow_sg" {
-  name        = "airflow_rules"
-  description = "Allow inbound traffic to webserver, flower potsgres and redis"
-  vpc_id      = data.aws_vpc.default.id
+# resource "aws_security_group" "airflow_sg" {
+#   name        = "airflow_rules"
+#   description = "Allow inbound traffic to webserver, flower potsgres and redis"
+#   vpc_id      = data.aws_vpc.default.id
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 5555
-    to_port     = 5555
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 6379
-    to_port     = 6379
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   egress {
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "-1"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
+#   ingress {
+#     from_port   = 5555
+#     to_port     = 5555
+#     protocol    = "tcp"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
+#   ingress {
+#     from_port   = 8080
+#     to_port     = 8080
+#     protocol    = "tcp"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
+#   ingress {
+#     from_port   = 6379
+#     to_port     = 6379
+#     protocol    = "tcp"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
+#   ingress {
+#     from_port   = 5432
+#     to_port     = 5432
+#     protocol    = "tcp"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
 
-  tags = {
-    Name    = "airflow_sg"
-    Project = "MLOps"
-    Owner   = "Farisology"
-  }
-}
+#   tags = {
+#     Name    = "airflow_sg"
+#     Project = "MLOps"
+#     Owner   = "Farisology"
+#   }
+# }
 
-resource "aws_instance" "airflow" {
-  ami           = "ami-0df7a207adb9748c7"
-  instance_type = "t3.medium"
-  key_name      = "zenml_server"
-  root_block_device {
-    volume_size = 30
-  }
-  vpc_security_group_ids = [
-    module.dev_ssh_sg.security_group_id,
-    module.default_ec2_sg.security_group_id,
-    aws_security_group.airflow_sg.id
-  ]
-  tags = {
-    Name    = "Airflow"
-    Project = "MLOps"
-    Owner   = "Farisology"
-  }
-  #   user_data = file("init_airflow.sh")
-}
+# resource "aws_instance" "airflow" {
+#   ami           = "ami-0df7a207adb9748c7"
+#   instance_type = "t3.medium"
+#   key_name      = "zenml_server"
+#   root_block_device {
+#     volume_size = 30
+#   }
+#   vpc_security_group_ids = [
+#     module.dev_ssh_sg.security_group_id,
+#     module.default_ec2_sg.security_group_id,
+#     aws_security_group.airflow_sg.id
+#   ]
+#   tags = {
+#     Name    = "Airflow"
+#     Project = "MLOps"
+#     Owner   = "Farisology"
+#   }
+#   #   user_data = file("init_airflow.sh")
+# }
